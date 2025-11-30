@@ -1,35 +1,48 @@
 import numpy as np
+from src.core.stats import (
+    Stats,
+    FeatureStats,
+    LabelStats
+)
 
 
-def choose_best_split(data):
+def choose_best_split(stats):
     best_split = (float('-inf'), None, None)  # (information_gain, feature, value)
-    for idx, feature_col in enumerate(data.T[:-1]):
-        unique_values = np.unique(feature_col)
-        for value in unique_values:
-            left_split, right_split = split_data(data, idx, value)
-
-            if len(left_split) == 0 or len(right_split) == 0:
+    for idx, feature_stats in enumerate(stats.distribution):
+        for label_stats in feature_stats.feature_distribution:
+            left_size = label_stats.total_count
+            right_size = stats.total_count - left_size
+            if left_size == 0 or right_size == 0:
                 continue
 
-            inf_gain = _calculate_entropy(data) - (
-                (len(left_split) / len(data)) * _calculate_entropy(np.array(left_split)) +
-                (len(right_split) / len(data)) * _calculate_entropy(np.array(right_split))
-            )
+            inf_gain = _calculate_info_gain(stats, left_size, right_size)
             if inf_gain > best_split[0]:
                 best_split = (inf_gain, idx, value)
 
-    return best_split[1], best_split[2]
+    return best_split
 
 
-def split_data(data, feature, value):
-    left_split = [row for row in data if row[feature] == value]
-    right_split = [row for row in data if row[feature] != value]
-    return np.array(left_split), np.array(right_split)
+def split_data(stats, feature, value):
+    feature_stats = stats.distribution[feature]
+    left_stats = Stats()
+    right_stats = Stats()
+    
 
 
-def _calculate_entropy(data):
-    labels = data[:, -1]
-    _, counts = np.unique(labels, return_counts=True)
-    probs = counts / len(labels)
-    entropy = -np.sum(probs * np.log2(probs))
-    return entropy
+def _calculate_info_gain(stats, label_stats, left_size, right_size):
+    total_size = left_size + right_size
+    weight_left = left_size / total_size
+    weight_right = right_size / total_size
+    parent_entropy = _calculate_entropy(list(stats.label_distribution.values()), stats.total_count)
+    left_entropy = _calculate_entropy(list(label_stats.label_distribution.values()), left_size)
+    right_entropy = _calculate_entropy(
+        [stats.label_distribution[label] - label_stats.label_distribution.get(label, 0) for label in stats.label_distribution],
+        right_size
+    )
+    gain = parent_entropy - (weight_left * left_entropy + weight_right * right_entropy)
+    return gain
+
+
+def _calculate_entropy(labels_count, total_count):
+    probs = labels_count / total_count
+    return -np.sum(probs * np.log2(probs))
