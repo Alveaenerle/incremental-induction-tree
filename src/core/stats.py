@@ -1,5 +1,3 @@
-import numpy as np
-
 class Stats:
     def __init__(self, num_features=None, data=None):
         self.total_count = 0
@@ -7,7 +5,6 @@ class Stats:
         self.distribution = []
 
         if data is not None and len(data) > 0:
-            self.total_count = len(data)
             num_features = data.shape[1] - 1
             self._init_structure(num_features)
             self.add_batch(data)

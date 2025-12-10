@@ -12,7 +12,7 @@ class IncrementalTree:
         self.root = Node(statistics=Stats(data=data))
         self.root.samples = list(data)
         self.root.output = self._get_majority_class(self.root)
-        
+
         if not self._is_pure(self.root):
             best_feat, gain = get_best_split(self.root.statistics)
             if best_feat is not None and gain > 0:
@@ -55,9 +55,9 @@ class IncrementalTree:
                     self._split_leaf(node, best_feat)
             return
 
-        # Pull-up logic
-        best_feat, _ = get_best_split(node.statistics)
-        if best_feat != node.feature and best_feat is not None:
+        best_feat, gain = get_best_split(node.statistics)
+
+        if best_feat != node.feature and best_feat is not None and gain > 0:
             self._pull_up(node, best_feat)
 
         val = sample[node.feature]
@@ -127,6 +127,7 @@ class IncrementalTree:
             child.statistics.add_batch(subset)
             child.output = self._get_majority_class(child)
             node.children[val] = child
+
         node.clear_samples()
 
     def _recursive_build(self, node):
