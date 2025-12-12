@@ -65,7 +65,7 @@ class ExperimentSuite:
         acc_sklearn = accuracy_score(y_test, y_pred_sklearn)
 
         print(f" - MyTree (Batch): Acc={acc_batch:.4f}, Time={t_batch:.4f}s")
-        print(f" - MyTree (Inc):   Acc={acc_inc:.4f},   Time={t_inc:.4f}s")
+        print(f" - MyTree (Inc):   Acc={acc_inc:.4f}, Time={t_inc:.4f}s")
         print(f" - Sklearn (CART): Acc={acc_sklearn:.4f}, Time={t_sklearn:.4f}s")
 
         self._plot_quality(
@@ -109,7 +109,7 @@ class ExperimentSuite:
                 speedup = t_retrain / t_update if t_update > 1e-9 else 0
 
                 print(f"{i:<5} | {t_update:.6f}   | "
-                      f"{t_retrain:.6f}    | {speedup:.1f}x")
+                      f"{t_retrain:.6f}   | {speedup:.1f}x")
 
                 n_samples.append(i)
                 times_update.append(t_update)
