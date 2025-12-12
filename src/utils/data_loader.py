@@ -57,10 +57,9 @@ class DataLoader:
 
         if size:
             df = df.sample(n=min(size, len(df)), random_state=42)
-        cols_to_drop = ['Evaporation', 'Sunshine', 'Date', 'Location']
-        df = df.dropna(subset=['RainTomorrow'])
+        cols_to_drop = ['Date', 'Location', 'Temp3pm', 'Pressure3pm']
         df = df.drop(columns=cols_to_drop, errors='ignore')
-        df = df.ffill().fillna(0)
+        df = df.dropna()
 
         return self._discretize_and_format(df, 'RainTomorrow')
 
