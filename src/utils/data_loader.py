@@ -57,10 +57,9 @@ class DataLoader:
 
         if size:
             df = df.sample(n=min(size, len(df)), random_state=42)
-
-        df = df.dropna(subset=['RainTomorrow'])
-        df = df.drop(columns=['Date', 'Location'], errors='ignore')
-        df = df.ffill().fillna(0)
+        cols_to_drop = ['Date', 'Location', 'Temp3pm', 'Pressure3pm']
+        df = df.drop(columns=cols_to_drop, errors='ignore')
+        df = df.dropna()
 
         return self._discretize_and_format(df, 'RainTomorrow')
 
@@ -80,15 +79,10 @@ class DataLoader:
             return None
 
         df = df.dropna(subset=[delay_col])
-        df['IsDelayed'] = (df[delay_col] > 15).astype(int)
-
-        cols_to_drop = [
-            delay_col, 'DepDelay', 'Cancelled', 'Diverted',
-            'FlightNum', 'TailNum'
-        ]
+        df = df.drop(df[df['Length'] == 0].index)
         df = df.drop(
-            columns=[c for c in cols_to_drop if c in df.columns],
+            columns=['Flight', 'id'],
             errors='ignore'
         )
 
-        return self._discretize_and_format(df, 'IsDelayed')
+        return self._discretize_and_format(df, 'Delay')
