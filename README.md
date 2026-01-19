@@ -12,6 +12,7 @@ This project implements an **Incremental Tree** algorithm that builds decision t
 - **Batch Learning**: Build trees from complete datasets
 - **Multiple Dataset Support**: Built-in loaders for IRIS, Australian Weather, and Airlines datasets
 - **Experimental Framework**: Comprehensive test suite comparing quality, performance, and stability
+- **Evaluation Metrics**: Accuracy and F1 Score (weighted) for multiclass classification
 - **Visualization**: Automatic generation of comparison charts and performance metrics
 
 ## Project Structure
@@ -141,10 +142,15 @@ Data is automatically discretized into configurable bins for the decision tree a
 The `ExperimentSuite` class provides three types of experiments:
 
 ### 1. Quality Comparison
-Compares classification accuracy between:
+Compares classification accuracy and F1 score (weighted average) between:
 - Incremental tree (batch mode)
 - Incremental tree (online mode with sequential updates)
 - scikit-learn DecisionTreeClassifier
+
+Metrics displayed:
+- **Accuracy**: Overall classification accuracy
+- **F1 Score**: Weighted F1 score for multiclass support
+- **Training Time**: Time taken to train each model
 
 ### 2. Time Performance
 Benchmarks:
@@ -161,9 +167,9 @@ Analyzes:
 ## Results
 
 Results are saved to the `results/` directory and include:
-- CSV files with detailed metrics
-- PNG visualizations comparing algorithms
-- Performance graphs and charts
+- PNG visualizations comparing algorithms (Accuracy, F1 Score, Training Time)
+- Performance graphs showing incremental vs batch training speedup
+- Console output with detailed metrics for each model
 
 ## Dependencies
 

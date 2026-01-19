@@ -3,7 +3,7 @@ import time
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import accuracy_score, f1_score
 from sklearn.tree import DecisionTreeClassifier
 from src.algorithms.incremental_tree import IncrementalTree
 
@@ -46,6 +46,7 @@ class ExperimentSuite:
 
         y_pred_batch = self._safe_predict(tree_batch, X_test)
         acc_batch = accuracy_score(y_test, y_pred_batch)
+        f1_batch = f1_score(y_test, y_pred_batch, average='weighted')
 
         t0 = time.time()
         tree_inc = IncrementalTree()
@@ -55,6 +56,7 @@ class ExperimentSuite:
 
         y_pred_inc = self._safe_predict(tree_inc, X_test)
         acc_inc = accuracy_score(y_test, y_pred_inc)
+        f1_inc = f1_score(y_test, y_pred_inc, average='weighted')
 
         t0 = time.time()
         clf_sklearn = DecisionTreeClassifier(criterion='entropy', random_state=42)
@@ -63,15 +65,17 @@ class ExperimentSuite:
 
         y_pred_sklearn = clf_sklearn.predict(X_test)
         acc_sklearn = accuracy_score(y_test, y_pred_sklearn)
+        f1_sklearn = f1_score(y_test, y_pred_sklearn, average='weighted')
 
-        print(f" - MyTree (Batch): Acc={acc_batch:.4f}, Time={t_batch:.4f}s")
-        print(f" - MyTree (Inc):   Acc={acc_inc:.4f}, Time={t_inc:.4f}s")
-        print(f" - Sklearn (CART): Acc={acc_sklearn:.4f}, Time={t_sklearn:.4f}s")
+        print(f" - MyTree (Batch): Acc={acc_batch:.4f}, F1={f1_batch:.4f}, Time={t_batch:.4f}s")
+        print(f" - MyTree (Inc):   Acc={acc_inc:.4f}, F1={f1_inc:.4f}, Time={t_inc:.4f}s")
+        print(f" - Sklearn (CART): Acc={acc_sklearn:.4f}, F1={f1_sklearn:.4f}, Time={t_sklearn:.4f}s")
 
         self._plot_quality(
             dataset_name,
             acc_batch, acc_inc, acc_sklearn,
-            t_batch, t_inc, t_sklearn
+            t_batch, t_inc, t_sklearn,
+            f1_batch, f1_inc, f1_sklearn
         )
 
     def time_performance(self, dataset_name, data):
@@ -148,8 +152,9 @@ class ExperimentSuite:
         raw_preds = [tree.predict(row) for row in X]
         return [p if p is not None else -1 for p in raw_preds]
 
-    def _plot_quality(self, name, acc_batch, acc_inc, acc_sk, t_batch, t_inc, t_sk):
-        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 5))
+    def _plot_quality(self, name, acc_batch, acc_inc, acc_sk, t_batch, t_inc, t_sk,
+                       f1_batch, f1_inc, f1_sk):
+        fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(18, 5))
 
         models = ['MyTree (Batch)', 'MyTree (Inc)', 'Sklearn']
         accs = [acc_batch, acc_inc, acc_sk]
@@ -174,6 +179,17 @@ class ExperimentSuite:
             ax2.text(bar.get_x() + bar.get_width() / 2., height,
                      f'{height:.4f}', ha='center', va='bottom')
 
+        f1_scores = [f1_batch, f1_inc, f1_sk]
+        bars3 = ax3.bar(models, f1_scores, color=['mediumpurple', 'mediumseagreen', 'silver'])
+        ax3.set_title(f'{name} - F1 Score Comparison (Weighted)')
+        ax3.set_ylim(0, 1.1)
+        ax3.set_ylabel('F1 Score')
+        for bar in bars3:
+            height = bar.get_height()
+            ax3.text(bar.get_x() + bar.get_width() / 2., height,
+                     f'{height:.4f}', ha='center', va='bottom')
+
+        plt.tight_layout()
         path = os.path.join(self.results_dir, f'{name}_quality_vs_sklearn.png')
         plt.savefig(path)
         plt.close()
