@@ -339,11 +339,6 @@ class ExperimentSuite:
         plt.close()
         print(f"[PLOT] Saved: {path}")
 
-        path = os.path.join(self.results_dir, f'{name}_quality_vs_sklearn.png')
-        plt.savefig(path)
-        plt.close()
-        print(f"[PLOT] Saved: {path}")
-
     def _plot_time_performance(self, name, n, t_up, t_ret, speedups):
         fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))
 
